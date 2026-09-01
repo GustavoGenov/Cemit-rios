@@ -83,10 +83,10 @@ export default function ExcelUploader({ onUploadComplete }) {
   };
 
   return (
-    <div className="bg-white dark:bg-gray-800 p-6 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm">
-      <h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-white flex items-center gap-2">
-        <FileSpreadsheet className="w-5 h-5 text-green-600" />
-        Importar Planilha (Excel)
+    <div className="glass-panel p-8 text-slate-800">
+      <h3 className="text-xl font-bold mb-6 text-teal-700 flex items-center gap-3">
+        <FileSpreadsheet className="w-6 h-6 text-emerald-500" />
+        Importar Nova Planilha (Excel)
       </h3>
       
       <div className="relative">
