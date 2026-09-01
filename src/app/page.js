@@ -14,16 +14,16 @@ export default function Dashboard() {
   
   const [showForm, setShowForm] = useState(false);
   const [formData, setFormData] = useState({
-    nome_inumado: '', data_obito: '', cemiterio: '', quadra: '', numero_tumulo: ''
+    cemiterio: '', inumados_completo: '', tumulo_jazigo: '', quadra_setor: '', data_registro: '', responsavel: '', contato_telefone: ''
   });
   const router = useRouter();
 
   const fetchObitos = async () => {
     setLoading(true);
-    let query = supabase.from('obitos').select('*').order('created_at', { ascending: false }).limit(50);
+    let query = supabase.from('obitos_v2').select('*').order('created_at', { ascending: false }).limit(50);
     
     if (searchTerm) {
-      query = query.ilike('nome_inumado', `%${searchTerm}%`);
+      query = query.ilike('inumados_completo', `%${searchTerm}%`);
     }
 
     const { data } = await query;
@@ -42,9 +42,9 @@ export default function Dashboard() {
 
   const handleAdd = async (e) => {
     e.preventDefault();
-    const { error } = await supabase.from('obitos').insert([formData]);
+    const { error } = await supabase.from('obitos_v2').insert([formData]);
     if (!error) {
-      setFormData({ nome_inumado: '', data_obito: '', cemiterio: '', quadra: '', numero_tumulo: '' });
+      setFormData({ cemiterio: '', inumados_completo: '', tumulo_jazigo: '', quadra_setor: '', data_registro: '', responsavel: '', contato_telefone: '' });
       setShowForm(false);
       fetchObitos();
     } else {
@@ -54,7 +54,7 @@ export default function Dashboard() {
 
   const handleDelete = async (id) => {
     if (confirm('Tem certeza que deseja deletar este registro?')) {
-      await supabase.from('obitos').delete().eq('id', id);
+      await supabase.from('obitos_v2').delete().eq('id', id);
       fetchObitos();
     }
   };
@@ -65,7 +65,7 @@ export default function Dashboard() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <h1 className="text-2xl font-bold flex items-center gap-2 text-teal-700">
             <span className="bg-teal-100 p-2 rounded-full">🌿</span>
-            Paz e Memória
+            Paz e Memória (V2)
           </h1>
           <button onClick={handleLogout} className="text-sm font-medium text-rose-500 hover:text-rose-600">
             Sair do Sistema
@@ -100,13 +100,14 @@ export default function Dashboard() {
         </section>
 
         {showForm && (
-          <form onSubmit={handleAdd} className="glass-panel p-6 rounded-2xl grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4">
-            <input required placeholder="Nome do Inumado" className="p-3 bg-white/60 border border-white rounded-xl outline-none focus:ring-2 focus:ring-teal-400" value={formData.nome_inumado} onChange={e=>setFormData({...formData, nome_inumado: e.target.value})} />
+          <form onSubmit={handleAdd} className="glass-panel p-6 rounded-2xl grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+            <input required placeholder="Nomes dos Inumados" className="p-3 bg-white/60 border border-white rounded-xl outline-none focus:ring-2 focus:ring-teal-400" value={formData.inumados_completo} onChange={e=>setFormData({...formData, inumados_completo: e.target.value})} />
             <input placeholder="Cemitério" className="p-3 bg-white/60 border border-white rounded-xl outline-none focus:ring-2 focus:ring-teal-400" value={formData.cemiterio} onChange={e=>setFormData({...formData, cemiterio: e.target.value})} />
-            <input placeholder="Nº Túmulo" className="p-3 bg-white/60 border border-white rounded-xl outline-none focus:ring-2 focus:ring-teal-400" value={formData.numero_tumulo} onChange={e=>setFormData({...formData, numero_tumulo: e.target.value})} />
-            <input placeholder="Quadra" className="p-3 bg-white/60 border border-white rounded-xl outline-none focus:ring-2 focus:ring-teal-400" value={formData.quadra} onChange={e=>setFormData({...formData, quadra: e.target.value})} />
-            <input placeholder="Data Óbito" className="p-3 bg-white/60 border border-white rounded-xl outline-none focus:ring-2 focus:ring-teal-400" value={formData.data_obito} onChange={e=>setFormData({...formData, data_obito: e.target.value})} />
-            <button type="submit" className="md:col-span-5 bg-emerald-500 hover:bg-emerald-600 text-white py-3 rounded-xl font-medium shadow-md">Salvar Registro no Banco</button>
+            <input placeholder="Nº Túmulo" className="p-3 bg-white/60 border border-white rounded-xl outline-none focus:ring-2 focus:ring-teal-400" value={formData.tumulo_jazigo} onChange={e=>setFormData({...formData, tumulo_jazigo: e.target.value})} />
+            <input placeholder="Quadra" className="p-3 bg-white/60 border border-white rounded-xl outline-none focus:ring-2 focus:ring-teal-400" value={formData.quadra_setor} onChange={e=>setFormData({...formData, quadra_setor: e.target.value})} />
+            <input placeholder="Data do Registro" className="p-3 bg-white/60 border border-white rounded-xl outline-none focus:ring-2 focus:ring-teal-400" value={formData.data_registro} onChange={e=>setFormData({...formData, data_registro: e.target.value})} />
+            <input placeholder="Responsável" className="p-3 bg-white/60 border border-white rounded-xl outline-none focus:ring-2 focus:ring-teal-400" value={formData.responsavel} onChange={e=>setFormData({...formData, responsavel: e.target.value})} />
+            <button type="submit" className="md:col-span-3 bg-emerald-500 hover:bg-emerald-600 text-white py-3 rounded-xl font-medium shadow-md">Salvar Registro no Banco</button>
           </form>
         )}
 
@@ -116,16 +117,16 @@ export default function Dashboard() {
               <thead className="bg-teal-50/80 border-b border-teal-100">
                 <tr>
                   <th className="p-4 font-semibold text-teal-800 rounded-tl-2xl">Cemitério</th>
-                  <th className="p-4 font-semibold text-teal-800">Inumado</th>
+                  <th className="p-4 font-semibold text-teal-800">Inumados</th>
                   <th className="p-4 font-semibold text-teal-800">Nº Túmulo</th>
                   <th className="p-4 font-semibold text-teal-800">Quadra</th>
-                  <th className="p-4 font-semibold text-teal-800">Data de Óbito</th>
+                  <th className="p-4 font-semibold text-teal-800">Data / Contato</th>
                   <th className="p-4 font-semibold text-teal-800 text-right rounded-tr-2xl">Ações</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-teal-50">
                 {loading ? (
-                  <tr><td colSpan="6" className="p-8 text-center text-slate-500">Carregando registros...</td></tr>
+                  <tr><td colSpan="6" className="p-8 text-center text-slate-500">Carregando registros consolidados...</td></tr>
                 ) : obitos.length === 0 ? (
                   <tr><td colSpan="6" className="p-8 text-center text-slate-500">Nenhum registro encontrado.</td></tr>
                 ) : obitos.map((o) => (
@@ -135,27 +136,28 @@ export default function Dashboard() {
                         <MapPin className="w-4 h-4 opacity-50" /> {o.cemiterio}
                       </div>
                     </td>
-                    <td className="p-4 font-semibold text-slate-700 flex items-center gap-2">
-                      <User className="w-4 h-4 text-emerald-500" /> {o.nome_inumado}
+                    <td className="p-4 font-semibold text-slate-700 flex items-center gap-2 whitespace-normal min-w-[300px]">
+                      <User className="w-4 h-4 text-emerald-500 flex-shrink-0" /> {o.inumados_completo}
                     </td>
                     <td className="p-4">
                       <div className="flex items-center gap-2">
-                        <Hash className="w-4 h-4 text-slate-400" /> <span className="font-mono bg-white/50 px-2 py-1 rounded-md">{o.numero_tumulo || '-'}</span>
+                        <Hash className="w-4 h-4 text-slate-400" /> <span className="font-mono bg-white/50 px-2 py-1 rounded-md">{o.tumulo_jazigo || '-'}</span>
                       </div>
                     </td>
                     <td className="p-4">
                       <div className="flex items-center gap-2">
-                        <Grid className="w-4 h-4 text-slate-400" /> {o.quadra || '-'}
+                        <Grid className="w-4 h-4 text-slate-400" /> {o.quadra_setor || '-'}
                       </div>
                     </td>
                     <td className="p-4">
-                      <div className="flex items-center gap-2 text-slate-600">
-                        <Calendar className="w-4 h-4 opacity-50" /> {o.data_obito || '-'}
+                      <div className="flex flex-col gap-1 text-slate-600 text-sm">
+                        <span><Calendar className="w-3 h-3 inline opacity-50" /> {o.data_registro || '-'}</span>
+                        {o.responsavel && <span className="text-xs font-medium bg-emerald-50 text-emerald-700 px-2 py-1 rounded">Resp: {o.responsavel}</span>}
                       </div>
                     </td>
                     <td className="p-4 text-right space-x-4">
                       <Link 
-                        href={`/tumulo?cemiterio=${encodeURIComponent(o.cemiterio)}&quadra=${encodeURIComponent(o.quadra)}&nr=${encodeURIComponent(o.numero_tumulo)}`}
+                        href={`/tumulo?cemiterio=${encodeURIComponent(o.cemiterio)}&quadra=${encodeURIComponent(o.quadra_setor)}&nr=${encodeURIComponent(o.tumulo_jazigo)}`}
                         className="text-teal-600 hover:text-teal-800 font-medium text-sm transition-colors"
                       >
                         Ver Jazigo

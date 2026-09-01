@@ -26,41 +26,44 @@ export default function ExcelUploader({ onUploadComplete }) {
       const worksheet = workbook.Sheets[workbook.SheetNames[0]];
       
       // Convert to JSON, starting from the header row
-      // We assume the header has DATA, CEMITERIO, NR, QUADRA, INUMADO
       const jsonData = XLSX.utils.sheet_to_json(worksheet, { defval: '' });
       
       setProgress(30);
-      setMessage(`Processando ${jsonData.length} linhas...`);
+      setMessage(`Processando ${jsonData.length} linhas da Base Consolidada...`);
 
       const recordsToInsert = [];
       
       for (const row of jsonData) {
-        // Map according to the columns shown in the user's screenshot
-        const data_obito = String(row['DATA'] || '').trim();
-        const cemiterio = String(row['CEMITERIO'] || '').trim();
-        const numero_tumulo = String(row['NR'] || '').trim();
-        const quadra = String(row['QUADRA'] || '').trim();
-        const nome_inumado = String(row['INUMADO'] || '').trim();
+        if (!row['cemiterio'] && !row['inumados_completo']) continue;
 
-        if (nome_inumado && cemiterio) {
-          recordsToInsert.push({
-            data_obito,
-            cemiterio,
-            numero_tumulo,
-            quadra,
-            nome_inumado
-          });
-        }
+        recordsToInsert.push({
+          id_registro: String(row['id_registro'] || ''),
+          cemiterio: String(row['cemiterio'] || ''),
+          tumulo_jazigo: String(row['tumulo_jazigo'] || ''),
+          quadra_setor: String(row['quadra_setor'] || ''),
+          inumados_completo: String(row['inumados_completo'] || ''),
+          status_jazigo: String(row['status_jazigo'] || ''),
+          quantidade_inumados: parseInt(row['quantidade_inumados']) || 0,
+          data_registro: String(row['data_registro'] || ''),
+          ano_registro: parseInt(row['ano_registro']) || null,
+          responsavel: String(row['responsavel'] || ''),
+          contato_telefone: String(row['contato_telefone'] || ''),
+          cpf_rg: String(row['cpf_rg'] || ''),
+          email: String(row['email'] || ''),
+          tipo_registro: String(row['tipo_registro'] || ''),
+          observacoes: String(row['observacoes'] || ''),
+          fonte_arquivo: String(row['fonte_arquivo'] || '')
+        });
       }
 
       setProgress(50);
-      setMessage(`Enviando ${recordsToInsert.length} registros válidos para o banco... Isso pode demorar.`);
+      setMessage(`Enviando ${recordsToInsert.length} registros para o Supabase...`);
 
-      // Batch insert in chunks of 1000
-      const chunkSize = 1000;
+      // Batch insert in chunks of 500
+      const chunkSize = 500;
       for (let i = 0; i < recordsToInsert.length; i += chunkSize) {
         const chunk = recordsToInsert.slice(i, i + chunkSize);
-        const { error } = await supabase.from('obitos').insert(chunk);
+        const { error } = await supabase.from('obitos_v2').insert(chunk);
         
         if (error) throw error;
         
@@ -68,7 +71,7 @@ export default function ExcelUploader({ onUploadComplete }) {
       }
 
       setStatus('success');
-      setMessage(`${recordsToInsert.length} óbitos cadastrados com sucesso!`);
+      setMessage(`${recordsToInsert.length} registros consolidados importados!`);
       if (onUploadComplete) onUploadComplete();
       
     } catch (error) {
